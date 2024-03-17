@@ -20,6 +20,7 @@ type Recompra struct {
 	UltimaDistancia    float64
 	CoberturaDistancia float64
 	TakeProfit         float64
+	TakeProfitPrice    float64
 }
 
 func GenerarRecompras(d data.Data) []Recompra {
@@ -66,13 +67,13 @@ func ImprimirRecompras(recompras []Recompra, tipoDeCompra string) {
 	for _, r := range recompras {
 		if tipoDeCompra == "short" {
 			if r.Precio < r.PrecioStopLoss {
-				fmt.Printf("Precio: %.4f, Cantidad: %.4f, Valor:%.4f, TotalMonedas:%.4f, Promedio: %.4f, PrecioStopLoss: %.4f, UltimaDistancia:%.2f, CoberturaDistancia:%.2f, TakeProfit: %.2f\n", r.Precio, r.Cantidad, r.Valor, r.TotalMonedas, r.Promedio, r.PrecioStopLoss, r.UltimaDistancia, r.CoberturaDistancia, r.TakeProfit)
+				fmt.Printf("Precio: %.7f, Cantidad: %.2f, TotalMonedas:%.2f, Promedio: %.7f, PrecioStopLoss: %.7f, UltimaDistancia:%.2f, CoberturaDistancia:%.2f, PrecioTP: %.7f, TakeProfit: %.2f\n", r.Precio, r.Cantidad, r.TotalMonedas, r.Promedio, r.PrecioStopLoss, r.UltimaDistancia, r.CoberturaDistancia, r.TakeProfitPrice, r.TakeProfit)
 			}
 		}
 
 		if tipoDeCompra == "long" {
 			if r.Precio > r.PrecioStopLoss {
-				fmt.Printf("Precio: %.4f, Cantidad: %.4f, Valor:%.4f, TotalMonedas:%.4f, Promedio: %.4f, PrecioStopLoss: %.4f, UltimaDistancia:%.2f, CoberturaDistancia:%.2f,  TakeProfit: %.2f\n", r.Precio, r.Cantidad, r.Valor, r.TotalMonedas, r.Promedio, r.PrecioStopLoss, (r.UltimaDistancia * -1), (r.CoberturaDistancia * -1), r.TakeProfit)
+				fmt.Printf("Precio: %.7f, Cantidad: %.2f, TotalMonedas:%.2f, Promedio: %.7f, PrecioStopLoss: %.7f, UltimaDistancia:%.2f, CoberturaDistancia:%.2f, PrecioTP: %.7f, TakeProfit: %.2f\n", r.Precio, r.Cantidad, r.TotalMonedas, r.Promedio, r.PrecioStopLoss, (r.UltimaDistancia * -1), (r.CoberturaDistancia * -1), r.TakeProfitPrice, r.TakeProfit)
 			}
 		}
 	}
@@ -167,10 +168,12 @@ func calcularTakeProfit(d data.Data, recompras []Recompra) {
 		var precioTomarGanancias float64
 		if d.TipoDeCompra == "long" {
 			precioTomarGanancias = (((d.TakeProfitPorcentaje * recompras[i].Promedio) / 100) - recompras[i].Promedio) * -1
+			recompras[i].TakeProfitPrice = (((d.TakeProfitPorcentaje * recompras[i].Promedio) / 100) + recompras[i].Promedio)
 		}
 
 		if d.TipoDeCompra == "short" {
 			precioTomarGanancias = ((d.TakeProfitPorcentaje * recompras[i].Promedio) / 100) + recompras[i].Promedio
+			recompras[i].TakeProfitPrice = (((d.TakeProfitPorcentaje * recompras[i].Promedio) / 100) - recompras[i].Promedio) * -1
 		}
 		costoFinal := precioTomarGanancias * recompras[i].TotalMonedas
 
